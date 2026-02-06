@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: Flashlink-url-service
+  datasource:
+    url: jdbc:mysql://localhost:3306/flashlink
+    username: root
+    password: password
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 15
+      connection-timeout: 30000
+  jpa:
+    hibernate:
+      ddl-auto: update # only for dev/test
+    properties:
+      hibernate:
+        format_sql: true
+        show_sql: true
+  profiles:
+    active: dev
