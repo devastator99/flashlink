@@ -1,0 +1,60 @@
+spring:
+  datasource:
+    hikari:
+      maximum-pool-size: 20
+      minimum-idle: 5
+      idle-timeout: 300000
+      max-lifetime: 1200000
+      connection-timeout: 20000
+      leak-detection-threshold: 60000
+      pool-name: UrlServiceHikariPool
+      
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQLDialect
+        format_sql: false
+        use_sql_comments: false
+        jdbc:
+          batch_size: 50
+          fetch_size: 100
+        connection:
+          provider_disables_autocommit: true
+        cache:
+          use_second_level_cache: true
+          use_query_cache: true
+          region:
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory
+        generate_statistics: false
+    show-sql: false
+    
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=5m,recordStats
+      
+  data:
+    redis:
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: -1ms
+
+# Database optimization settings
+database:
+  optimization:
+    batch:
+      size: 50
+      timeout: 30s
+    connection:
+      retry:
+        attempts: 3
+        delay: 1000ms
+    query:
+      timeout: 10s
+      slow-query-threshold: 1s

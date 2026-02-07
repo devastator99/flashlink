@@ -18,3 +18,63 @@ spring:
         show_sql: true
   profiles:
     active: dev
+  cache:
+    type: caffeine
+    caffeine:
+      spec: maximumSize=10000,expireAfterWrite=5m
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      timeout: 2000ms
+      lettuce:
+        pool:
+          max-active: 8
+          max-idle: 8
+          min-idle: 0
+
+# Rate limiting configuration
+rate:
+  limit:
+    requests-per-minute: 60
+    burst-capacity: 10
+
+# Resilience4j configuration
+resilience4j:
+  ratelimiter:
+    configs:
+      default:
+        limitForPeriod: 60
+        limitRefreshPeriod: 1m
+        timeoutDuration: 1s
+        registerHealthIndicator: true
+    instances:
+      redirect:
+        baseConfig: default
+      shorten:
+        limitForPeriod: 10
+        baseConfig: default
+      expand:
+        limitForPeriod: 30
+        baseConfig: default
+
+# Server configuration
+server:
+  port: 8080
+  tomcat:
+    threads:
+      max: 200
+      min-spare: 10
+    connection-timeout: 20000ms
+    accept-count: 100
+
+# Flashlink configuration
+flashlink:
+  node-id: 1
+
+# Logging configuration
+logging:
+  level:
+    com.flashlink: DEBUG
+    org.springframework.cache: DEBUG
+    io.github.resilience4j: INFO
