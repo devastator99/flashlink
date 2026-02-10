@@ -33,12 +33,12 @@ This implementation adds comprehensive analytics, async processing, and observab
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│ RedirectController │───▶│ AnalyticsProducer │───▶│   Kafka Topic   │
+│RedirectController│──▶│AnalyticsProducer │───▶│   Kafka Topic.  │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
          │                       │                       │
          ▼                       ▼                       ▼
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   UrlService    │    │   MetricsConfig  │    │ AnalyticsConsumer│
+│   UrlService    │    │   MetricsConfig  │    │AnalyticsConsumer│
 └─────────────────┘    └──────────────────┘    └─────────────────┘
          │                       │                       │
          ▼                       ▼                       ▼
