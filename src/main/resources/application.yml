@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: url-shortener-service
+  main:
+    allow-circular-references: true
+  profiles:
+    active: dev
+  kafka:
+    bootstrap-servers: localhost:9092
+    consumer:
+      group-id: flashlink-group
+      auto-offset-reset: earliest
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    topics:
+    analytics-events: analytics-events-topic
+
+server:
+  port: 8080
+
+logging:
+  level:
+    com.flashlink.demoflashlink_url_service: DEBUG
+    org.springframework.kafka: INFO
+    org.springframework.cache: DEBUG
+
+
