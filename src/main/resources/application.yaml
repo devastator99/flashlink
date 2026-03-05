@@ -32,11 +32,19 @@ spring:
           max-active: 8
           max-idle: 8
           min-idle: 0
+  kafka:
+    bootstrap-servers: localhost:9092
+    topics:
+      analytics-events: analytics-events-topic
 
+kafka:
+  topics:
+    analytics-events: analytics-events-topic
 # Rate limiting configuration
 rate:
   limit:
     requests-per-minute: 60
+    limitForPeriod: 60
     burst-capacity: 10
 
 # Resilience4j configuration

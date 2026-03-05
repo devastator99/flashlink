@@ -23,7 +23,7 @@ WORKDIR /app
 ENV JAVA_OPTS="-XX:+UseG1GC -XX:+HeapDumpOnOutOfMemoryError -Xms512m -Xmx1024m -XX:+ExitOnOutOfMemoryError"
 
 # Copy built JAR from the build stage
-COPY --from=build /app/build/libs/flashlink-url-service-*.jar app.jar
+COPY --from=build /app/build/libs/*.jar app.jar
 
 # Expose application port
 EXPOSE 8080

@@ -4,8 +4,8 @@ import com.flashlink.demoflashlink_url_service.model.AnalyticsEvent;
 import com.flashlink.demoflashlink_url_service.repository.UrlMappingRepository;
 import io.micrometer.core.instrument.Counter;
 import io.micrometer.core.instrument.MeterRegistry;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.support.Acknowledgment;
 import org.springframework.kafka.support.KafkaHeaders;
@@ -17,7 +17,6 @@ import java.time.LocalDateTime;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class AnalyticsConsumerService {
     
     private final UrlMappingRepository urlMappingRepository;
@@ -25,6 +24,7 @@ public class AnalyticsConsumerService {
     private final Counter analyticsEventCounter;
     private final Counter redirectCounter;
     
+    @Autowired
     public AnalyticsConsumerService(UrlMappingRepository urlMappingRepository, MeterRegistry meterRegistry) {
         this.urlMappingRepository = urlMappingRepository;
         this.meterRegistry = meterRegistry;
@@ -44,7 +44,7 @@ public class AnalyticsConsumerService {
     public void handleAnalyticsEvent(
             @Payload AnalyticsEvent event,
             @Header(KafkaHeaders.RECEIVED_TOPIC) String topic,
-            @Header(KafkaHeaders.RECEIVED_PARTITION_ID) int partition,
+            @Header(KafkaHeaders.RECEIVED_PARTITION) int partition,
             @Header(KafkaHeaders.OFFSET) long offset,
             Acknowledgment acknowledgment) {
         
@@ -70,10 +70,7 @@ public class AnalyticsConsumerService {
                     log.warn("Unknown event type: {}", event.getEventType());
             }
             
-            analyticsEventCounter.increment(
-                    "event_type", event.getEventType(),
-                    "short_code", event.getShortCode()
-            );
+            analyticsEventCounter.increment();
             
             acknowledgment.acknowledge();
             log.debug("Successfully processed analytics event: {}", event.getEventId());

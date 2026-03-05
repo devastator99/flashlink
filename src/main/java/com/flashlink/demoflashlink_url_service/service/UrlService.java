@@ -5,6 +5,7 @@ import com.flashlink.demoflashlink_url_service.repository.UrlMappingRepository;
 import com.flashlink.demoflashlink_url_service.util.Base62Encoder;
 import com.flashlink.demoflashlink_url_service.util.SnowflakeIdGenerator;
 import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
@@ -23,7 +24,7 @@ public class UrlService {
     private final SnowflakeIdGenerator idGenerator;
     private final Base62Encoder base62;
     private final AnalyticsProducerService analyticsProducerService;
-    private final Timer urlShorteningTimer;
+    private final MeterRegistry meterRegistry;
     private static final int MAX_RETRIES = 3;
     private static final int DEFAULT_EXPIRY_DAYS = 30;
 
@@ -42,8 +43,15 @@ public class UrlService {
     @Transactional
     @CacheEvict(value = "urlMapping", allEntries = true)
     public UrlMapping shortenUrl(String longUrl, LocalDateTime expiryAt, String ownerId) {
-        return Timer.Sample.start(urlShorteningTimer)
-                .stopCallable(() -> performUrlShortening(longUrl, expiryAt, ownerId));
+        Timer.Sample sample = Timer.start(meterRegistry);
+        try {
+            UrlMapping result = performUrlShortening(longUrl, expiryAt, ownerId);
+            sample.stop(Timer.builder("url.shortening.duration").register(meterRegistry));
+            return result;
+        } catch (Exception e) {
+            sample.stop(Timer.builder("url.shortening.duration").register(meterRegistry));
+            throw e;
+        }
     }
 
     private UrlMapping performUrlShortening(String longUrl, LocalDateTime expiryAt, String ownerId) {

@@ -21,17 +21,19 @@ public class RateLimitService {
     private final RateLimiterRegistry rateLimiterRegistry;
     private final DefaultRedisScript<Long> rateLimitScript;
     
-    @Value("${rate.limit.requests-per-minute:60}")
-    private int requestsPerMinute;
+    private final int requestsPerMinute;
     
-    @Value("${rate.limit.burst-capacity:10}")
-    private int burstCapacity;
+    private final int burstCapacity;
     
-    public RateLimitService(RedisTemplate<String, String> redisTemplate) {
+    public RateLimitService(RedisTemplate<String, String> redisTemplate,
+                            @Value("${rate.limit.requests-per-minute:60}") int requestsPerMinute,
+                            @Value("${rate.limit.burst-capacity:10}") int burstCapacity) {
         this.redisTemplate = redisTemplate;
+        this.requestsPerMinute = requestsPerMinute;
+        this.burstCapacity = burstCapacity;
         this.rateLimiterRegistry = RateLimiterRegistry.of(
             RateLimiterConfig.custom()
-                .limitForPeriod(requestsPerMinute)
+                .limitForPeriod(this.requestsPerMinute)
                 .limitRefreshPeriod(Duration.ofMinutes(1))
                 .timeoutDuration(Duration.ofSeconds(1))
                 .build()

@@ -33,13 +33,10 @@ public class AnalyticsProducerService {
                 .build();
                 
         try {
-            kafkaTemplate.send(analyticsTopic, shortCode, event)
-                    .addCallback(
-                            result -> log.debug("Analytics event published: {}", event.getEventId()),
-                            failure -> log.error("Failed to publish analytics event: {}", event.getEventId(), failure)
-                    );
+            kafkaTemplate.send(analyticsTopic, shortCode, event);
+            log.debug("Analytics event published: {}", event.getEventId());
         } catch (Exception e) {
-            log.error("Error publishing analytics event", e);
+            log.error("Failed to publish analytics event: {}", event.getEventId(), e);
         }
     }
     

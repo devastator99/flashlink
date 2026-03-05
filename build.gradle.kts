@@ -26,6 +26,7 @@ repositories {
 }
 
 dependencies {
+	implementation ("org.latencyutils:LatencyUtils:2.0.3")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
@@ -39,8 +40,8 @@ dependencies {
 	implementation("org.flywaydb:flyway-core")
 	implementation("org.flywaydb:flyway-mysql")
 	implementation("com.github.ben-manes.caffeine:caffeine")
-	implementation("io.github.resilience4j:resilience4j-spring-boot3:2.2.1")
-	implementation("io.github.resilience4j:resilience4j-ratelimiter:2.2.1")
+	implementation("io.github.resilience4j:resilience4j-spring-boot3:2.1.0")
+	implementation("io.github.resilience4j:resilience4j-ratelimiter:2.1.0")
 	compileOnly("org.projectlombok:lombok")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	runtimeOnly("com.h2database:h2")

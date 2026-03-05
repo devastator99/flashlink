@@ -2,8 +2,6 @@ package com.flashlink.demoflashlink_url_service.config;
 
 import io.micrometer.core.instrument.MeterRegistry;
 import io.micrometer.core.instrument.Timer;
-import lombok.RequiredArgsConstructor;
-import org.springframework.boot.actuate.autoconfigure.metrics.MeterRegistryCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -12,15 +10,7 @@ import org.springframework.data.redis.core.RedisTemplate;
 import java.time.Duration;
 
 @Configuration
-@RequiredArgsConstructor
 public class MetricsConfig {
-
-    private final RedisConnectionFactory redisConnectionFactory;
-
-    @Bean
-    public MeterRegistryCustomizer<MeterRegistry> metricsCommonTags() {
-        return registry -> registry.config().commonTags("application", "url-service");
-    }
 
     @Bean
     public Timer urlShorteningTimer(MeterRegistry meterRegistry) {

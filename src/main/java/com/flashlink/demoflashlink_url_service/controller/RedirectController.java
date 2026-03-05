@@ -6,6 +6,7 @@ import com.flashlink.demoflashlink_url_service.service.RateLimitService;
 import com.flashlink.demoflashlink_url_service.service.UrlService;
 import io.github.resilience4j.ratelimiter.annotation.RateLimiter;
 import io.micrometer.core.instrument.Timer;
+import io.micrometer.core.instrument.MeterRegistry;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -25,7 +26,7 @@ public class RedirectController {
     private final UrlService urlService;
     private final RateLimitService rateLimitService;
     private final AnalyticsProducerService analyticsProducerService;
-    private final Timer redirectTimer;
+    private final MeterRegistry meterRegistry;
 
     @GetMapping("/")
     public String index() {
@@ -35,8 +36,15 @@ public class RedirectController {
     @GetMapping("/{shortCode:[a-zA-Z0-9]+}")
     @RateLimiter(name = "redirect", fallbackMethod = "redirectFallback")
     public RedirectView redirectToLongUrl(@PathVariable String shortCode, HttpServletRequest request) {
-        return Timer.Sample.start(redirectTimer)
-                .stopCallable(() -> performRedirect(shortCode, request));
+        Timer.Sample sample = Timer.start(meterRegistry);
+        try {
+            RedirectView result = performRedirect(shortCode, request);
+            sample.stop(Timer.builder("redirect.duration").register(meterRegistry));
+            return result;
+        } catch (Exception e) {
+            sample.stop(Timer.builder("redirect.duration").register(meterRegistry));
+            throw e;
+        }
     }
     
     private RedirectView performRedirect(String shortCode, HttpServletRequest request) {
