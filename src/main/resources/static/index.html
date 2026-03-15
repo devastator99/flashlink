@@ -9,6 +9,29 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes fade-in {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes pulse-subtle {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .animate-fade-in {
+            animation: fade-in 0.3s ease-out;
+        }
+        .animate-pulse-subtle {
+            animation: pulse-subtle 2s infinite;
+        }
+        .hover-lift {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .hover-lift:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
     <div id="root"></div>
@@ -23,8 +46,48 @@
             const [error, setError] = useState('');
             const [history, setHistory] = useState([]);
 
+            useEffect(() => {
+                const handleKeyDown = (e) => {
+                    if (e.ctrlKey && e.key === 'Enter') {
+                        document.getElementById('shorten-form').requestSubmit();
+                    }
+                    if (e.key === 'Escape') {
+                        setUrl('');
+                        setError('');
+                        setResult(null);
+                    }
+                };
+
+                document.addEventListener('keydown', handleKeyDown);
+                return () => document.removeEventListener('keydown', handleKeyDown);
+            }, []);
+
+            const validateUrl = (url) => {
+                if (!url) return 'Please enter a URL';
+                
+                try {
+                    const urlObj = new URL(url);
+                    if (!['http:', 'https:'].includes(urlObj.protocol)) {
+                        return 'URL must start with http:// or https://';
+                    }
+                    if (urlObj.hostname.length === 0) {
+                        return 'Please enter a valid domain name';
+                    }
+                    return null;
+                } catch {
+                    return 'Please enter a valid URL format';
+                }
+            };
+
             const handleSubmit = async (e) => {
                 e.preventDefault();
+                
+                const validationError = validateUrl(url);
+                if (validationError) {
+                    setError(validationError);
+                    return;
+                }
+                
                 setLoading(true);
                 setError('');
                 setResult(null);
@@ -64,9 +127,20 @@
             const copyToClipboard = async (text) => {
                 try {
                     await navigator.clipboard.writeText(text);
-                    // You could add a toast notification here
+                    // Show success feedback
+                    const originalText = event.target.innerHTML;
+                    event.target.innerHTML = '<i class="fas fa-check"></i>';
+                    event.target.classList.add('bg-green-600', 'hover:bg-green-700');
+                    event.target.classList.remove('bg-blue-600', 'hover:bg-blue-700');
+                    
+                    setTimeout(() => {
+                        event.target.innerHTML = originalText;
+                        event.target.classList.remove('bg-green-600', 'hover:bg-green-700');
+                        event.target.classList.add('bg-blue-600', 'hover:bg-blue-700');
+                    }, 2000);
                 } catch (err) {
                     console.error('Failed to copy:', err);
+                    setError('Failed to copy to clipboard');
                 }
             };
 
@@ -99,11 +173,12 @@
                             </div>
 
                             {/* URL Shortener Form */}
-                            <div className="bg-white rounded-2xl shadow-xl p-8 mb-8">
-                                <form onSubmit={handleSubmit} className="space-y-6">
+                            <div className="bg-white rounded-2xl shadow-xl p-8 mb-8 hover-lift">
+                                <form id="shorten-form" onSubmit={handleSubmit} className="space-y-6">
                                     <div>
                                         <label htmlFor="url" className="block text-sm font-medium text-gray-700 mb-2">
                                             Enter your long URL
+                                            <span className="text-xs text-gray-500 ml-2">(Press Ctrl+Enter to submit)</span>
                                         </label>
                                         <div className="flex space-x-4">
                                             <input
@@ -115,11 +190,14 @@
                                                 className="flex-grow px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                                                 required
                                                 pattern="^https?://.*"
+                                                aria-label="URL to shorten"
+                                                aria-describedby="url-help"
                                             />
                                             <button
                                                 type="submit"
                                                 disabled={loading || !url}
                                                 className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                                                aria-label="Shorten URL"
                                             >
                                                 {loading ? (
                                                     <span className="flex items-center">
@@ -134,10 +212,13 @@
                                                 )}
                                             </button>
                                         </div>
+                                        <p id="url-help" className="text-xs text-gray-500 mt-1">
+                                            Press Escape to clear form
+                                        </p>
                                     </div>
 
                                     {error && (
-                                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+                                        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg animate-pulse">
                                             <i className="fas fa-exclamation-circle mr-2"></i>
                                             {error}
                                         </div>
@@ -147,7 +228,7 @@
 
                             {/* Result Display */}
                             {result && (
-                                <div className="bg-green-50 border border-green-200 rounded-2xl p-8 mb-8">
+                                <div className="bg-green-50 border border-green-200 rounded-2xl p-8 mb-8 animate-fade-in">
                                     <div className="flex items-center justify-between mb-4">
                                         <h3 className="text-lg font-semibold text-green-800">
                                             <i className="fas fa-check-circle mr-2"></i>
@@ -194,9 +275,9 @@
 
                             {/* History */}
                             {history.length > 0 && (
-                                <div className="bg-white rounded-2xl shadow-xl p-8">
+                                <div className="bg-white rounded-2xl shadow-xl p-8 hover-lift">
                                     <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                                        <i className="fas fa-history mr-2"></i>
+                                        <i className="fas fa-history mr-2 animate-pulse-subtle"></i>
                                         Recent Short URLs
                                     </h3>
                                     <div className="space-y-3">
