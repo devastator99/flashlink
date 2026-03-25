@@ -23,6 +23,7 @@ public class AnalyticsConsumerService {
     private final MeterRegistry meterRegistry;
     private final Counter analyticsEventCounter;
     private final Counter redirectCounter;
+    private final Counter linkCreatedCounter;
     
     public AnalyticsConsumerService(UrlMappingRepository urlMappingRepository, MeterRegistry meterRegistry) {
         this.urlMappingRepository = urlMappingRepository;
