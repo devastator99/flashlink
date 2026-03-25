@@ -24,7 +24,6 @@ public class AnalyticsConsumerService {
     private final Counter analyticsEventCounter;
     private final Counter redirectCounter;
     
-    @Autowired
     public AnalyticsConsumerService(UrlMappingRepository urlMappingRepository, MeterRegistry meterRegistry) {
         this.urlMappingRepository = urlMappingRepository;
         this.meterRegistry = meterRegistry;
