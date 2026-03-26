@@ -23,7 +23,6 @@ public class AnalyticsConsumerService {
     private final MeterRegistry meterRegistry;
     private final Counter analyticsEventCounter;
     private final Counter redirectCounter;
-    private final Counter linkCreatedCounter;
     
     public AnalyticsConsumerService(UrlMappingRepository urlMappingRepository, MeterRegistry meterRegistry) {
         this.urlMappingRepository = urlMappingRepository;
@@ -98,11 +97,12 @@ public class AnalyticsConsumerService {
     }
     
     private void handleLinkCreatedEvent(AnalyticsEvent event) {
-        meterRegistry.counter("links.created", "owner_id", 
-                event.getMetadata() != null ? event.getMetadata().get("ownerId").toString() : "unknown")
-                .increment();
+        String ownerId = event.getMetadata() != null && event.getMetadata().containsKey("ownerId") 
+                ? event.getMetadata().get("ownerId").toString() 
+                : "unknown";
+        meterRegistry.counter("links.created", "owner_id", ownerId).increment();
         log.debug("Link created event processed for: {}", event.getShortCode());
-    }
+    },
     
     private void handleLinkExpiredEvent(AnalyticsEvent event) {
         meterRegistry.counter("links.expired").increment();
