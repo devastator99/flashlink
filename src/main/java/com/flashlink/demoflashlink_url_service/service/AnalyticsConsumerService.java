@@ -102,7 +102,7 @@ public class AnalyticsConsumerService {
                 : "unknown";
         meterRegistry.counter("links.created", "owner_id", ownerId).increment();
         log.debug("Link created event processed for: {}", event.getShortCode());
-    },
+    }
     
     private void handleLinkExpiredEvent(AnalyticsEvent event) {
         meterRegistry.counter("links.expired").increment();
