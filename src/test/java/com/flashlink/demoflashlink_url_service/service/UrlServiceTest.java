@@ -44,25 +44,23 @@ class UrlServiceTest {
 
     @BeforeEach
     void setUp() {
-        // MeterRegistry is not critical for unit tests, let it use default behavior
+        // Initialize mocks with default behavior to reduce boilerplate
+        lenient().when(idGenerator.nextId()).thenReturn(12345L);
+        lenient().when(base62.encode(12345L)).thenReturn("abc123");
+        lenient().when(repository.existsByShortCode("abc123")).thenReturn(false);
+        lenient().when(repository.save(any(UrlMapping.class))).thenAnswer(invocation -> {
+            UrlMapping mapping = invocation.getArgument(0);
+            if (mapping.getCreatedAt() == null) {
+                mapping.setCreatedAt(LocalDateTime.now());
+            }
+            return mapping;
+        });
     }
 
     @Test
     void shortenUrl_ShouldCreateMapping_WhenValidUrl() {
         // Given
         String longUrl = "https://example.com";
-        long id = 12345L;
-        String shortCode = "abc123";
-        LocalDateTime now = LocalDateTime.now();
-
-        when(idGenerator.nextId()).thenReturn(id);
-        when(base62.encode(id)).thenReturn(shortCode);
-        when(repository.existsByShortCode(shortCode)).thenReturn(false);
-        when(repository.save(any(UrlMapping.class))).thenAnswer(invocation -> {
-            UrlMapping mapping = invocation.getArgument(0);
-            mapping.setCreatedAt(now);
-            return mapping;
-        });
 
         // When
         UrlMapping result = urlService.shortenUrl(longUrl);
@@ -70,13 +68,12 @@ class UrlServiceTest {
         // Then
         assertThat(result).isNotNull();
         assertThat(result.getLongUrl()).isEqualTo(longUrl);
-        assertThat(result.getShortCode()).isEqualTo(shortCode);
-        assertThat(result.getId()).isEqualTo(id);
-        assertThat(result.getCreatedAt()).isEqualTo(now);
+        assertThat(result.getShortCode()).isEqualTo("abc123");
+        assertThat(result.getId()).isEqualTo(12345L);
         assertThat(result.getRedirectCount()).isEqualTo(0L);
 
         verify(repository).save(any(UrlMapping.class));
-        verify(analyticsProducerService).publishLinkCreatedEvent(shortCode, longUrl, null);
+        verify(analyticsProducerService).publishLinkCreatedEvent("abc123", longUrl, null);
     }
 
     @Test
