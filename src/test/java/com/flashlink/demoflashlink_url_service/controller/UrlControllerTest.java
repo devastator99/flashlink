@@ -120,13 +120,14 @@ class UrlControllerTest {
         request.setLongUrl(longUrl);
 
         when(urlService.shortenUrl(anyString()))
-                .thenThrow(new RuntimeException("Service unavailable"));
+                .thenThrow(new IllegalStateException("Service unavailable"));
 
         // When & Then
         mockMvc.perform(post("/api/shorten")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isInternalServerError());
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.error").exists());
     }
 
     @Test
