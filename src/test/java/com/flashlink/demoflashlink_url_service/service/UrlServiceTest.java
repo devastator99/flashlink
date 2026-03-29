@@ -212,6 +212,17 @@ class UrlServiceTest {
     }
 
     @Test
+    void shortenUrl_ShouldHandleNullUrl_WhenGivenNull() {
+        // Given
+        String longUrl = null;
+
+        // When & Then
+        assertThatThrownBy(() -> urlService.shortenUrl(longUrl))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("URL cannot be null or empty");
+    }
+
+    @Test
     void getUrlMapping_ShouldReturnEmpty_WhenUrlExpired() {
         // Given
         String shortCode = "expired";
