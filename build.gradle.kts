@@ -26,7 +26,7 @@ repositories {
 }
 
 dependencies {
-	implementation ("org.latencyutils:LatencyUtils:2.0.3")
+	implementation("org.latencyutils:LatencyUtils:2.0.3")
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-webmvc")
